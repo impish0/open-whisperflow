@@ -132,18 +132,20 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
               <h4>Docker Status</h4>
               {dockerStatus ? (
                 <>
-                  <div className={`status-badge ${dockerStatus.available ? "status-ok" : "status-error"}`}>
+                  <div
+                    className={`status-badge ${dockerStatus.available ? "status-ok" : "status-error"}`}
+                  >
                     Docker: {dockerStatus.available ? "✓ Running" : "✗ Not Running"}
                   </div>
                   {dockerStatus.available && (
                     <>
-                      <div className={`status-badge ${dockerStatus.container_running ? "status-ok" : "status-warning"}`}>
+                      <div
+                        className={`status-badge ${dockerStatus.container_running ? "status-ok" : "status-warning"}`}
+                      >
                         Container: {dockerStatus.container_running ? "✓ Running" : "Stopped"}
                       </div>
                       {dockerStatus.has_nvidia_gpu && (
-                        <div className="status-badge status-ok">
-                          GPU: ✓ NVIDIA CUDA Available
-                        </div>
+                        <div className="status-badge status-ok">GPU: ✓ NVIDIA CUDA Available</div>
                       )}
                     </>
                   )}
@@ -186,7 +188,8 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
               >
                 {availableModels.map((model) => (
                   <option key={model.name} value={model.name}>
-                    {model.name} - {model.size} {model.recommended ? "(Recommended)" : ""} - {model.description}
+                    {model.name} - {model.size} {model.recommended ? "(Recommended)" : ""} -{" "}
+                    {model.description}
                   </option>
                 ))}
               </select>
@@ -194,9 +197,14 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
 
             {!dockerStatus?.available && (
               <div className="info-box warning">
-                <strong>Docker Required:</strong> Please install and start Docker Desktop to use local transcription.
+                <strong>Docker Required:</strong> Please install and start Docker Desktop to use
+                local transcription.
                 <br />
-                <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://www.docker.com/products/docker-desktop/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Download Docker Desktop
                 </a>
               </div>

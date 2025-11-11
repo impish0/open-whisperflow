@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import RecordingButton from "./components/RecordingButton";
 import StatusIndicator from "./components/StatusIndicator";
 import SettingsPanel from "./components/SettingsPanel";
+import FirstRunWizard from "./components/FirstRunWizard";
 import { RecordingState, AppConfig } from "./types";
 import "./App.css";
 
@@ -10,16 +11,25 @@ function App() {
   const [recordingState, setRecordingState] = useState<RecordingState>({ type: "Idle" });
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<{
     transcription: string;
     cleaned_text: string;
   } | null>(null);
 
-  // Load config on mount
+  // Load config and check first run on mount
   useEffect(() => {
     loadConfig();
+    checkFirstRun();
   }, []);
+
+  const checkFirstRun = () => {
+    const hasCompletedSetup = localStorage.getItem("whisperflow_first_run_complete");
+    if (!hasCompletedSetup) {
+      setShowWizard(true);
+    }
+  };
 
   const loadConfig = async () => {
     try {
@@ -83,8 +93,18 @@ function App() {
     }
   };
 
+  const handleWizardComplete = (finalConfig: AppConfig) => {
+    setConfig(finalConfig);
+    setShowWizard(false);
+  };
+
   const isRecording = recordingState.type === "Recording";
   const isProcessing = recordingState.type === "Processing";
+
+  // Show wizard if first run
+  if (showWizard) {
+    return <FirstRunWizard onComplete={handleWizardComplete} />;
+  }
 
   return (
     <div className="app">

@@ -9,12 +9,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 2 (v0.2.0)
-- faster-whisper Docker integration
-- Local model management UI
-- GPU detection and automatic backend selection
-- Model download with progress indicators
-- Offline transcription support
+### Phase 2 (v0.2.0) - In Progress
+
+#### Added - Backend
+- **Docker Integration** for faster-whisper local transcription
+  - Complete Docker container lifecycle management (start, stop, health checks)
+  - Automatic NVIDIA GPU detection and CUDA passthrough
+  - CPU fallback for systems without GPU
+  - Uses fedirz/faster-whisper-server with OpenAI-compatible API
+  - Container runs on http://127.0.0.1:8000
+- **FasterWhisperBackend** trait implementation
+  - Async container initialization
+  - Automatic container startup on first transcription
+  - 5-minute timeout for long audio files
+  - Health checks and readiness detection
+- **GPU Detection System**
+  - NVIDIA GPU detection via nvidia-smi
+  - Automatic CUDA container selection
+  - Runtime information exposed to frontend
+- **Model Management**
+  - Support for 5 Whisper models (tiny, base, small, medium, large)
+  - Model information with sizes and descriptions
+  - Recommended model highlighting (small)
+- **New Tauri Commands**
+  - `check_docker_status` - Docker and GPU status
+  - `start_whisper_container` - Container management
+  - `stop_whisper_container` - Graceful shutdown
+  - `get_available_models` - Model list with metadata
+
+#### Added - Frontend
+- **Docker Status UI** in Settings Panel
+  - Real-time Docker availability monitoring
+  - Container running status indicator
+  - NVIDIA GPU detection display
+  - Status badges (success/warning/error states)
+- **Container Management UI**
+  - One-click Start/Stop container buttons
+  - Loading states during operations
+  - User-friendly error messages
+- **Model Selection UI**
+  - Dropdown with all Whisper models
+  - Model size and description display
+  - Recommended model indicator
+- **Enhanced UX**
+  - Warning box when Docker not available
+  - Direct link to Docker Desktop download
+  - Dark/light mode support for all new components
+  - Responsive layout
+
+#### Added - Dependencies
+- **bollard 0.17** - Docker API client for Rust
+- **futures-util 0.3** - Async stream handling
+
+#### Changed
+- TranscriptionService::new() is now async to support Docker initialization
+- Settings Panel now loads Docker status on mount
+- Enhanced backend selection to show "Cloud" vs "Local - Docker"
+
+#### Technical Details
+- OpenAI API-compatible interface for seamless backend switching
+- Arc<Mutex<DockerClient>> for safe concurrent access
+- Async-first throughout Docker operations
+- Type-safe communication between Rust and TypeScript
+- Pluggable backend architecture preserved
+
+#### Still TODO for Phase 2
+- End-to-end testing with local Docker setup
+- Model download progress tracking improvements
+- AMD GPU detection (ROCm support)
+- Performance benchmarking
 
 ---
 

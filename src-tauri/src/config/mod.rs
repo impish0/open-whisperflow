@@ -1,0 +1,159 @@
+use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+
+use crate::error::{AppError, Result};
+
+/// Main application configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AppConfig {
+    pub audio: AudioConfig,
+    pub transcription: TranscriptionConfig,
+    pub llm: LLMConfig,
+    pub injection: InjectionConfig,
+    pub hotkeys: HotkeyConfig,
+    pub ui: UIConfig,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AudioConfig {
+    pub sample_rate: u32,
+    pub channels: u16,
+    pub bit_depth: u16,
+    pub device_id: String,
+    pub vad_enabled: bool,
+    pub max_recording_duration_seconds: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TranscriptionConfig {
+    pub backend: TranscriptionBackend,
+    pub model: String,
+    pub language: Option<String>,
+    pub openai_api_key: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum TranscriptionBackend {
+    FasterWhisper,
+    OpenAI,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LLMConfig {
+    pub backend: LLMBackend,
+    pub model: String,
+    pub base_url: String,
+    pub api_key: Option<String>,
+    pub default_template: String,
+    pub temperature: f32,
+    pub max_tokens: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum LLMBackend {
+    Ollama,
+    OpenAI,
+    None,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InjectionConfig {
+    pub method: InjectionMethod,
+    pub typing_speed_ms: u64,
+    pub clipboard_backup: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum InjectionMethod {
+    Clipboard,
+    Typing,
+    Hybrid,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HotkeyConfig {
+    pub toggle_recording: String,
+    pub cancel_recording: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UIConfig {
+    pub theme: Theme,
+    pub show_notifications: bool,
+    pub minimize_to_tray: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum Theme {
+    Light,
+    Dark,
+    System,
+}
+
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            audio: AudioConfig {
+                sample_rate: 16000,
+                channels: 1,
+                bit_depth: 16,
+                device_id: "default".to_string(),
+                vad_enabled: true,
+                max_recording_duration_seconds: 300,
+            },
+            transcription: TranscriptionConfig {
+                backend: TranscriptionBackend::OpenAI,
+                model: "whisper-1".to_string(),
+                language: None,
+                openai_api_key: None,
+            },
+            llm: LLMConfig {
+                backend: LLMBackend::OpenAI,
+                model: "gpt-4o-mini".to_string(),
+                base_url: "https://api.openai.com/v1".to_string(),
+                api_key: None,
+                default_template: "balanced".to_string(),
+                temperature: 0.7,
+                max_tokens: 500,
+            },
+            injection: InjectionConfig {
+                method: InjectionMethod::Hybrid,
+                typing_speed_ms: 1,
+                clipboard_backup: true,
+            },
+            hotkeys: HotkeyConfig {
+                toggle_recording: "Ctrl+Shift+Space".to_string(),
+                cancel_recording: "Escape".to_string(),
+            },
+            ui: UIConfig {
+                theme: Theme::System,
+                show_notifications: true,
+                minimize_to_tray: true,
+            },
+        }
+    }
+}
+
+impl AppConfig {
+    /// Load configuration from disk
+    pub fn load() -> Result<Self> {
+        confy::load("open-whisperflow", "config")
+            .map_err(|e| AppError::Config(format!("Failed to load config: {}", e)))
+    }
+
+    /// Save configuration to disk
+    pub fn save(&self) -> Result<()> {
+        confy::store("open-whisperflow", "config", self)
+            .map_err(|e| AppError::Config(format!("Failed to save config: {}", e)))
+    }
+
+    /// Get config file path
+    pub fn get_config_path() -> Result<PathBuf> {
+        confy::get_configuration_file_path("open-whisperflow", "config")
+            .map_err(|e| AppError::Config(format!("Failed to get config path: {}", e)))
+    }
+}

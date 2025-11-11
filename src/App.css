@@ -1,0 +1,165 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #444;
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.settings-btn {
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.recording-panel {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.cancel-btn {
+  background: #d32f2f;
+  color: white;
+  padding: 0.8rem 2rem;
+}
+
+.cancel-btn:hover {
+  background: #b71c1c;
+}
+
+.error-message {
+  padding: 1rem;
+  background: #d32f2f;
+  color: white;
+  border-radius: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.result-display {
+  width: 100%;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-display h3 {
+  margin-bottom: 1rem;
+  color: #646cff;
+}
+
+.result-section {
+  margin-bottom: 1.5rem;
+}
+
+.result-section h4 {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.result-section p {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  line-height: 1.6;
+}
+
+.instructions {
+  width: 100%;
+  padding: 1.5rem;
+  background: rgba(100, 108, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(100, 108, 255, 0.2);
+}
+
+.instructions h3 {
+  margin-bottom: 1rem;
+  color: #646cff;
+}
+
+.instructions ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.instructions li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.instructions .tip {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.app-footer {
+  padding: 1rem;
+  text-align: center;
+  border-top: 1px solid #444;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-color-scheme: light) {
+  .app-header {
+    border-bottom-color: #ddd;
+  }
+
+  .settings-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .result-display {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .result-section p {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .instructions {
+    background: rgba(100, 108, 255, 0.05);
+    border-color: rgba(100, 108, 255, 0.2);
+  }
+
+  .app-footer {
+    border-top-color: #ddd;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

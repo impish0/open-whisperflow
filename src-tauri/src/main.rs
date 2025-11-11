@@ -17,7 +17,55 @@ mod transcription;
 mod utils;
 
 use audio::AudioRecorder;
+use config::AppConfig;
+use docker::DockerClient;
 use state::AppState;
+
+/// Prepare backends on startup for faster first use
+async fn prepare_backends(state: AppState) {
+    log::info!("Preparing backends in background...");
+
+    // Load config
+    let config = state.config.read().await;
+
+    // If using faster-whisper, pre-start the container
+    if matches!(config.transcription.backend, config::TranscriptionBackend::FasterWhisper) {
+        log::info!("Detected faster-whisper backend, pre-starting Docker container...");
+
+        match DockerClient::new() {
+            Ok(docker) => {
+                if docker.is_available().await {
+                    match docker.is_container_running().await {
+                        Ok(false) => {
+                            log::info!("Starting faster-whisper container...");
+                            if let Err(e) = docker.start_container().await {
+                                log::warn!("Failed to pre-start container: {}. Will retry on first use.", e);
+                            } else {
+                                match docker.wait_for_ready(30).await {
+                                    Ok(_) => log::info!("Container ready for instant transcription!"),
+                                    Err(e) => log::warn!("Container started but health check failed: {}", e),
+                                }
+                            }
+                        }
+                        Ok(true) => {
+                            log::info!("Container already running");
+                        }
+                        Err(e) => {
+                            log::warn!("Failed to check container status: {}", e);
+                        }
+                    }
+                } else {
+                    log::warn!("Docker not available, container will start on first transcription");
+                }
+            }
+            Err(e) => {
+                log::warn!("Failed to initialize Docker client: {}", e);
+            }
+        }
+    }
+
+    log::info!("Backend preparation complete");
+}
 
 fn main() {
     // Initialize logger
@@ -43,11 +91,17 @@ fn main() {
             ));
 
             // Manage state
-            app.manage(app_state);
+            app.manage(app_state.clone());
             app.manage(audio_recorder);
 
             log::info!("Application setup complete");
             log::info!("System info:\n{}", utils::get_system_info());
+
+            // Spawn background task to prepare Docker container if needed
+            let state_clone = app_state.clone();
+            tauri::async_runtime::spawn(async move {
+                prepare_backends(state_clone).await;
+            });
 
             Ok(())
         })

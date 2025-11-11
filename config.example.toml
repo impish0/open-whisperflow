@@ -1,0 +1,241 @@
+# Open WhisperFlow Configuration Example
+# This file shows all available configuration options
+# Copy to: ~/.config/open-whisperflow/config.toml (Linux)
+#      or: %APPDATA%\open-whisperflow\config.toml (Windows)
+
+[audio]
+# Audio recording settings
+sample_rate = 16000  # Hz - Whisper native rate, don't change unless needed
+channels = 1  # Mono (1) or Stereo (2) - Mono recommended for speech
+bit_depth = 16  # Bits per sample - 16 is sufficient for speech
+device_id = "default"  # Audio input device, "default" uses system default
+
+# Voice Activity Detection (VAD)
+vad_enabled = true  # Enable VAD to remove silence
+vad_aggressiveness = 1  # 0-3, higher = more aggressive silence removal
+vad_frame_duration_ms = 30  # Frame size for VAD processing
+
+# Recording limits
+max_recording_duration_seconds = 300  # 5 minutes max
+min_recording_duration_seconds = 1  # Minimum 1 second
+
+[transcription]
+# Whisper backend selection
+backend = "faster-whisper"  # Options: "faster-whisper", "openai"
+
+# faster-whisper settings (local)
+model = "small"  # Options: "tiny", "base", "small", "medium", "large"
+device = "auto"  # "auto", "cpu", "cuda"
+compute_type = "auto"  # "auto", "int8", "float16", "float32"
+num_workers = 1  # Parallel workers for transcription
+beam_size = 5  # Higher = more accurate but slower (1-10)
+
+# Language settings
+language = "auto"  # "auto" or specific language code ("en", "es", "fr", etc.)
+task = "transcribe"  # "transcribe" or "translate" (to English)
+
+# Docker settings (for faster-whisper)
+docker_enabled = true
+docker_image = "ghcr.io/ggml-org/whisper.cpp:main-cuda"
+docker_auto_start = true
+
+# OpenAI API settings
+openai_api_key = ""  # Your OpenAI API key (leave empty if not using)
+openai_model = "whisper-1"  # OpenAI Whisper model
+
+[llm]
+# LLM backend for text rewriting
+backend = "ollama"  # Options: "ollama", "openai", "none"
+
+# Ollama settings (local)
+ollama_base_url = "http://localhost:11434/v1"
+ollama_model = "llama3.2:3b"  # Model name from ollama list
+ollama_timeout_seconds = 30
+
+# OpenAI settings (cloud)
+openai_api_key = ""  # Your OpenAI API key
+openai_base_url = "https://api.openai.com/v1"
+openai_model = "gpt-4o-mini"  # Options: "gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"
+openai_timeout_seconds = 30
+
+# Generation settings
+temperature = 0.7  # 0.0-2.0, lower = more consistent, higher = more creative
+max_tokens = 500  # Maximum tokens in response
+top_p = 1.0  # Nucleus sampling parameter
+
+# Prompt template
+default_template = "balanced"  # Name of default template to use
+enable_rewriting = true  # Set to false to disable LLM rewriting (raw transcription only)
+
+# Context detection
+context_detection_enabled = true  # Auto-detect active application
+context_override = ""  # Force specific context (leave empty for auto)
+
+[injection]
+# Text injection method
+method = "hybrid"  # Options: "clipboard", "typing", "hybrid"
+
+# Typing simulation settings
+typing_speed_ms = 1  # Delay between keystrokes (1-10ms)
+typing_turbo = true  # Type as fast as possible (ignores typing_speed_ms)
+
+# Clipboard settings
+clipboard_backup = true  # Save and restore original clipboard
+clipboard_restore_delay_ms = 100  # Wait time before restoring clipboard
+
+# Retry settings
+retry_on_failure = true
+max_retries = 3
+retry_delay_ms = 500
+
+[hotkeys]
+# Global hotkey bindings
+# Format: "Modifier+Modifier+Key"
+# Modifiers: Ctrl, Shift, Alt, Super (Windows key / Command)
+
+# Recording control
+toggle_recording = "Ctrl+Shift+Space"  # Start/stop recording
+cancel_recording = "Escape"  # Cancel current recording
+
+# App control
+open_settings = "Ctrl+Shift+Comma"  # Open settings window
+show_history = "Ctrl+Shift+H"  # Show transcription history
+toggle_window = "Ctrl+Shift+W"  # Show/hide main window
+
+# Quick actions
+paste_last = "Ctrl+Shift+V"  # Paste last transcription again
+retry_last = "Ctrl+Shift+R"  # Retry processing last audio
+
+[ui]
+# User interface settings
+theme = "system"  # Options: "light", "dark", "system"
+window_opacity = 1.0  # 0.0-1.0
+always_on_top = false  # Keep window always on top
+
+# Recording indicator
+show_recording_indicator = true
+indicator_position = "top-right"  # "top-left", "top-right", "bottom-left", "bottom-right"
+indicator_size = "medium"  # "small", "medium", "large"
+
+# Notifications
+show_notifications = true
+notification_duration_seconds = 3
+notify_on_success = true
+notify_on_error = true
+
+# System tray
+minimize_to_tray = true
+start_minimized = false
+close_to_tray = true  # Close button minimizes to tray instead of quitting
+
+[history]
+# Transcription history settings
+enabled = true
+max_entries = 1000  # Maximum history items to keep
+auto_cleanup_days = 30  # Auto-delete entries older than X days (0 = never)
+save_audio_files = false  # Save original audio files (uses more disk space)
+
+# Storage location
+history_path = ""  # Empty = default location (~/.local/share/open-whisperflow/)
+
+[performance]
+# Performance tuning
+parallel_processing = true  # Process transcription and LLM in parallel when possible
+cache_models = true  # Keep models loaded in memory
+preload_models_on_startup = false  # Load models at app start (faster first use, slower startup)
+
+# Resource limits
+max_memory_mb = 4096  # Maximum RAM usage (0 = unlimited)
+gpu_memory_fraction = 0.8  # Fraction of GPU memory to use (0.1-1.0)
+
+[privacy]
+# Privacy and security settings
+telemetry_enabled = false  # Send anonymous usage statistics (opt-in only)
+crash_reporting = false  # Send crash reports (opt-in only)
+auto_delete_audio = true  # Delete audio files after processing
+audio_encryption = false  # Encrypt audio files (future feature)
+
+# Data collection (all opt-in)
+collect_error_logs = false
+collect_performance_metrics = false
+collect_usage_statistics = false
+
+[advanced]
+# Advanced settings - change only if you know what you're doing
+log_level = "info"  # "debug", "info", "warn", "error"
+log_to_file = true
+log_file_path = ""  # Empty = default location
+
+# IPC settings
+ipc_timeout_ms = 5000
+max_ipc_payload_mb = 10
+
+# Update settings
+check_for_updates = true
+auto_download_updates = false
+update_channel = "stable"  # "stable", "beta", "nightly"
+
+[experimental]
+# Experimental features - may be unstable
+streaming_transcription = false  # Stream audio to Whisper in real-time
+real_time_rewriting = false  # Show rewriting as it happens
+voice_shortcuts = false  # Enable voice command shortcuts
+multi_language_auto_detect = false  # Auto-detect and switch languages mid-recording
+
+[prompt_templates.minimal]
+name = "Minimal"
+description = "Light touch - just remove filler words"
+prompt = """
+Clean up this voice transcription by:
+1. Removing filler words (um, uh, like, you know)
+2. Fixing obvious typos
+3. Adding basic punctuation
+4. DO NOT change the tone or rephrase sentences
+
+Transcription: {text}
+
+Cleaned:
+"""
+temperature = 0.5
+
+[prompt_templates.balanced]
+name = "Balanced"
+description = "Default - good balance of cleanup and preservation"
+prompt = """
+You are a text refinement assistant. Your task is to clean up voice transcriptions while preserving the original meaning and intent.
+
+Instructions:
+- Remove filler words (um, uh, like, you know, so, kind of)
+- Fix grammar and punctuation
+- Improve sentence structure slightly
+- Keep the same level of formality
+- Preserve technical terms and proper nouns exactly
+- DO NOT summarize or significantly rewrite
+
+Transcription: {text}
+
+Refined text:
+"""
+temperature = 0.7
+
+[prompt_templates.professional]
+name = "Professional"
+description = "Formal business communication"
+prompt = """
+You are a professional writing assistant. Transform this voice transcription into polished, professional business communication.
+
+Guidelines:
+- Remove all filler words and casual language
+- Use formal, professional tone
+- Improve sentence structure and flow
+- Add appropriate business language
+- Maintain clarity and conciseness
+- Preserve factual content exactly
+
+Transcription: {text}
+
+Professional version:
+"""
+temperature = 0.6
+
+# Add more custom templates as needed...

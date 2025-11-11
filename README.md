@@ -2,7 +2,38 @@
 
 **Privacy-first, open-source voice-to-text with AI-powered text refinement.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](CHANGELOG.md)
+[![Phase](https://img.shields.io/badge/phase-1%20complete-green.svg)](TODO.md)
+
 Transform your speech into polished, written content across any application on Windows and Linux. No subscriptions, no cloud lock-in, complete control over your data.
+
+> **📖 Documentation**: [User Guide](#-quick-start) • [Contributing](CONTRIBUTING.md) • [Roadmap](COMPREHENSIVE_PLAN.md) • [TODO](TODO.md) • [Changelog](CHANGELOG.md)
+
+---
+
+## 📚 Documentation Hub
+
+### For Users
+- **[Installation Guide](#installation)** - Get up and running
+- **[Configuration](#%EF%B8%8F-configuration)** - Set up local or cloud backends
+- **[Usage](#-usage)** - How to use the app
+- **[Troubleshooting](#-troubleshooting)** - Common issues and solutions
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history
+
+### For Contributors & Developers
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
+- **[CLAUDE.md](CLAUDE.md)** - **START HERE for AI/developers** - Architecture, patterns, standards
+- **[TODO.md](TODO.md)** - Tasks, bugs, and features
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical architecture
+- **[Issue Templates](.github/ISSUE_TEMPLATE/)** - Report bugs or request features
+
+### Planning & Vision
+- **[COMPREHENSIVE_PLAN.md](COMPREHENSIVE_PLAN.md)** - 20-week development roadmap
+- **[PROMPT_TEMPLATES.md](PROMPT_TEMPLATES.md)** - Prompt engineering guide
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - What's been built
+
+> **🤖 For AI Assistants**: Read [CLAUDE.md](CLAUDE.md) first! It contains critical context about project structure, development patterns, and documentation standards.
 
 ---
 

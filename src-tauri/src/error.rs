@@ -36,6 +36,9 @@ pub enum AppError {
     #[error("Backend not available: {0}")]
     BackendUnavailable(String),
 
+    #[error("Docker error: {0}")]
+    Docker(String),
+
     #[error("Unknown error: {0}")]
     Unknown(String),
 }
@@ -65,6 +68,9 @@ impl AppError {
             }
             AppError::BackendUnavailable(_) => {
                 "Required backend is not available. Please configure it in settings.".to_string()
+            }
+            AppError::Docker(_) => {
+                "Docker error. Please ensure Docker is installed and running.".to_string()
             }
             _ => "An unexpected error occurred. Please try again.".to_string(),
         }

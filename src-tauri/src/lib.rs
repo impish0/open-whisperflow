@@ -3,6 +3,7 @@
 pub mod audio;
 pub mod commands;
 pub mod config;
+pub mod docker;
 pub mod error;
 pub mod hotkeys;
 pub mod injection;

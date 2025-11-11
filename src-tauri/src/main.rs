@@ -7,6 +7,7 @@ use tokio::sync::Mutex as TokioMutex;
 mod audio;
 mod commands;
 mod config;
+mod docker;
 mod error;
 mod hotkeys;
 mod injection;
@@ -60,6 +61,10 @@ fn main() {
             commands::get_system_info,
             commands::check_transcription_backend,
             commands::check_llm_backend,
+            commands::check_docker_status,
+            commands::start_whisper_container,
+            commands::stop_whisper_container,
+            commands::get_available_models,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

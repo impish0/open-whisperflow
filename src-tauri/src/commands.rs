@@ -5,7 +5,7 @@ use tokio::sync::Mutex as TokioMutex;
 use crate::audio::AudioRecorder;
 use crate::config::AppConfig;
 use crate::docker::DockerClient;
-use crate::error::Result;
+use crate::error::{AppError, Result};
 use crate::injection::TextInjector;
 use crate::llm::LLMService;
 use crate::state::{AppState, ProcessingStage, RecordingState};
@@ -316,6 +316,132 @@ pub fn get_available_models() -> Vec<ModelInfo> {
     ]
 }
 
+/// Check Ollama status
+#[tauri::command]
+pub async fn check_ollama_status(state: State<'_, AppState>) -> Result<OllamaStatus> {
+    let config = state.config.read().await;
+    let ollama_url = config.llm.base_url.replace("/v1", "");
+
+    // Check if Ollama is running
+    let available = match reqwest::Client::new()
+        .get(format!("{}/api/tags", ollama_url))
+        .timeout(std::time::Duration::from_secs(2))
+        .send()
+        .await
+    {
+        Ok(response) => response.status().is_success(),
+        Err(_) => false,
+    };
+
+    Ok(OllamaStatus {
+        available,
+        base_url: ollama_url.clone(),
+        message: if available {
+            "Ollama is running".to_string()
+        } else {
+            "Ollama is not running or not installed".to_string()
+        },
+    })
+}
+
+/// Get list of installed Ollama models
+#[tauri::command]
+pub async fn get_ollama_models(state: State<'_, AppState>) -> Result<Vec<OllamaModelInfo>> {
+    let config = state.config.read().await;
+    let ollama_url = config.llm.base_url.replace("/v1", "");
+
+    #[derive(serde::Deserialize)]
+    struct OllamaModelsResponse {
+        models: Vec<OllamaModel>,
+    }
+
+    #[derive(serde::Deserialize)]
+    struct OllamaModel {
+        name: String,
+        size: i64,
+        modified_at: String,
+    }
+
+    let response = reqwest::Client::new()
+        .get(format!("{}/api/tags", ollama_url))
+        .timeout(std::time::Duration::from_secs(5))
+        .send()
+        .await
+        .map_err(|e| AppError::LLMProcessing(format!("Failed to get Ollama models: {}", e)))?;
+
+    if !response.status().is_success() {
+        return Err(AppError::LLMProcessing(
+            "Failed to fetch Ollama models".to_string(),
+        ));
+    }
+
+    let data: OllamaModelsResponse = response.json().await?;
+
+    let models = data
+        .models
+        .into_iter()
+        .map(|m| {
+            let size_gb = (m.size as f64) / 1_073_741_824.0;
+            let size_str = if size_gb >= 1.0 {
+                format!("{:.1} GB", size_gb)
+            } else {
+                format!("{} MB", (m.size as f64) / 1_048_576.0)
+            };
+
+            // Determine if recommended based on model name
+            let recommended = m.name.contains("llama3.2:3b")
+                || m.name.contains("llama3:8b")
+                || m.name.contains("mistral:7b");
+
+            OllamaModelInfo {
+                name: m.name,
+                size: size_str,
+                modified_at: m.modified_at,
+                recommended,
+            }
+        })
+        .collect();
+
+    Ok(models)
+}
+
+/// Get recommended Ollama models for rewriting
+#[tauri::command]
+pub fn get_recommended_ollama_models() -> Vec<OllamaModelInfo> {
+    vec![
+        OllamaModelInfo {
+            name: "llama3.2:3b".to_string(),
+            size: "2 GB".to_string(),
+            modified_at: String::new(),
+            recommended: true,
+        },
+        OllamaModelInfo {
+            name: "llama3:8b".to_string(),
+            size: "4.7 GB".to_string(),
+            modified_at: String::new(),
+            recommended: true,
+        },
+        OllamaModelInfo {
+            name: "mistral:7b".to_string(),
+            size: "4.1 GB".to_string(),
+            modified_at: String::new(),
+            recommended: true,
+        },
+        OllamaModelInfo {
+            name: "phi3:3.8b".to_string(),
+            size: "2.3 GB".to_string(),
+            modified_at: String::new(),
+            recommended: false,
+        },
+        OllamaModelInfo {
+            name: "gemma2:9b".to_string(),
+            size: "5.5 GB".to_string(),
+            modified_at: String::new(),
+            recommended: false,
+        },
+    ]
+}
+
 // Response types
 #[derive(Debug, serde::Serialize)]
 pub struct ProcessedResult {
@@ -343,5 +469,20 @@ pub struct ModelInfo {
     pub name: String,
     pub size: String,
     pub description: String,
+    pub recommended: bool,
+}
+
+#[derive(Debug, serde::Serialize)]
+pub struct OllamaStatus {
+    pub available: bool,
+    pub base_url: String,
+    pub message: String,
+}
+
+#[derive(Debug, serde::Serialize)]
+pub struct OllamaModelInfo {
+    pub name: String,
+    pub size: String,
+    pub modified_at: String,
     pub recommended: bool,
 }

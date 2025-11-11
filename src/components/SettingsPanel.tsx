@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { AppConfig, DockerStatus, ModelInfo } from "@/types";
+import { AppConfig, DockerStatus, ModelInfo, OllamaStatus, OllamaModelInfo } from "@/types";
 import "./SettingsPanel.css";
 
 interface SettingsPanelProps {
@@ -13,12 +13,18 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
   const [localConfig, setLocalConfig] = useState<AppConfig>(config);
   const [dockerStatus, setDockerStatus] = useState<DockerStatus | null>(null);
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
+  const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus | null>(null);
+  const [ollamaModels, setOllamaModels] = useState<OllamaModelInfo[]>([]);
+  const [recommendedOllamaModels, setRecommendedOllamaModels] = useState<OllamaModelInfo[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Load Docker status and models on mount
   useEffect(() => {
     loadDockerStatus();
     loadAvailableModels();
+    loadOllamaStatus();
+    loadOllamaModels();
+    loadRecommendedOllamaModels();
   }, []);
 
   const loadDockerStatus = async () => {
@@ -36,6 +42,34 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
       setAvailableModels(models);
     } catch (error) {
       console.error("Failed to load models:", error);
+    }
+  };
+
+  const loadOllamaStatus = async () => {
+    try {
+      const status = await invoke<OllamaStatus>("check_ollama_status");
+      setOllamaStatus(status);
+    } catch (error) {
+      console.error("Failed to load Ollama status:", error);
+    }
+  };
+
+  const loadOllamaModels = async () => {
+    try {
+      const models = await invoke<OllamaModelInfo[]>("get_ollama_models");
+      setOllamaModels(models);
+    } catch (error) {
+      console.error("Failed to load Ollama models:", error);
+      setOllamaModels([]);
+    }
+  };
+
+  const loadRecommendedOllamaModels = async () => {
+    try {
+      const models = await invoke<OllamaModelInfo[]>("get_recommended_ollama_models");
+      setRecommendedOllamaModels(models);
+    } catch (error) {
+      console.error("Failed to load recommended Ollama models:", error);
     }
   };
 
@@ -255,15 +289,81 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
 
         {localConfig.llm.backend === "Ollama" && (
           <>
+            {/* Ollama Status */}
+            <div className="docker-status">
+              <h4>Ollama Status</h4>
+              {ollamaStatus ? (
+                <>
+                  <div
+                    className={`status-badge ${ollamaStatus.available ? "status-ok" : "status-error"}`}
+                  >
+                    Ollama: {ollamaStatus.available ? "✓ Running" : "✗ Not Running"}
+                  </div>
+                  <p className="status-message">{ollamaStatus.message}</p>
+                  <p className="status-url">URL: {ollamaStatus.base_url}</p>
+                </>
+              ) : (
+                <div>Loading Ollama status...</div>
+              )}
+            </div>
+
+            {!ollamaStatus?.available && (
+              <div className="info-box warning">
+                <strong>Ollama Required:</strong> Please install and start Ollama to use local LLM
+                rewriting.
+                <br />
+                <a
+                  href="https://ollama.com/download"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download Ollama
+                </a>
+                <br />
+                <small>After installation, run: <code>ollama serve</code></small>
+              </div>
+            )}
+
+            {/* Model Selection */}
             <label>
               Model:
-              <input
-                type="text"
-                placeholder="llama3.2:3b"
-                value={localConfig.llm.model}
-                onChange={(e) => updateLLM("model", e.target.value)}
-              />
+              {ollamaModels.length > 0 ? (
+                <select
+                  value={localConfig.llm.model}
+                  onChange={(e) => updateLLM("model", e.target.value)}
+                >
+                  {ollamaModels.map((model) => (
+                    <option key={model.name} value={model.name}>
+                      {model.name} - {model.size} {model.recommended ? "(Recommended)" : ""}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="llama3.2:3b"
+                  value={localConfig.llm.model}
+                  onChange={(e) => updateLLM("model", e.target.value)}
+                />
+              )}
             </label>
+
+            {ollamaStatus?.available && ollamaModels.length === 0 && (
+              <div className="info-box info">
+                <strong>No Models Installed</strong>
+                <p>Recommended models to install:</p>
+                <ul>
+                  {recommendedOllamaModels.map((model) => (
+                    <li key={model.name}>
+                      <strong>{model.name}</strong> ({model.size})
+                      <br />
+                      <code>ollama pull {model.name}</code>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <label>
               Base URL:
               <input

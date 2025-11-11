@@ -87,3 +87,16 @@ export interface ModelInfo {
   description: string;
   recommended: boolean;
 }
+
+export interface OllamaStatus {
+  available: boolean;
+  base_url: string;
+  message: string;
+}
+
+export interface OllamaModelInfo {
+  name: string;
+  size: string;
+  modified_at: string;
+  recommended: boolean;
+}

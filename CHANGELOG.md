@@ -81,6 +81,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+### Phase 3 (Local LLM Integration) - Added 2025-11-11
+
+#### Added - Backend
+- **Ollama Status Management**
+  - `check_ollama_status` - Real-time Ollama availability detection
+  - `get_ollama_models` - List installed local models with metadata
+  - `get_recommended_ollama_models` - Curated model suggestions
+- **Ollama Model Discovery**
+  - Automatic model detection via Ollama API
+  - Model size and last modified tracking
+  - Recommended model highlighting (llama3.2:3b, llama3:8b, mistral:7b)
+- **Response Types**
+  - OllamaStatus struct with availability and connection info
+  - OllamaModelInfo struct with size and recommendation flags
+
+#### Added - Frontend
+- **Ollama Status UI** in Settings Panel
+  - Real-time Ollama service monitoring
+  - Connection status indicator
+  - Base URL display
+- **Model Management UI**
+  - Dropdown with installed models (when available)
+  - Model size display with human-readable formatting
+  - Recommended model indicators
+- **Installation Guidance**
+  - Warning box when Ollama not running
+  - Direct link to Ollama download page
+  - Command instructions for model installation
+  - Recommended models list with pull commands
+- **Smart Model Selection**
+  - Auto-populate dropdown from installed models
+  - Fallback to text input for manual entry
+  - Show model recommendations when no models installed
+
+#### Changed
+- Settings Panel now loads Ollama status on mount
+- Model input adapts based on installed models availability
+- Enhanced LLM backend section with real-time status
+
+#### Technical Details
+- TypeScript interfaces for OllamaStatus and OllamaModelInfo
+- API calls to Ollama's /api/tags endpoint
+- 2-second timeout for status checks to avoid UI blocking
+- Graceful degradation when Ollama not available
+
+#### Phase 3 Status
+- ✅ Ollama backend (UnifiedLLMClient already implemented)
+- ✅ Ollama status commands
+- ✅ Ollama model management commands
+- ✅ Ollama UI in Settings Panel
+- ⏳ First-run wizard Ollama setup step
+- ⏳ End-to-end testing (audio → faster-whisper → Ollama → injection)
+- ⏳ Performance benchmarking vs cloud APIs
+
+**Complete Local Pipeline**: Users can now run 100% offline with faster-whisper (Docker) + Ollama (local LLM) at zero cost!
+
+---
+
 ### Phase 2.5 (Consumer-Ready UX) - Added 2025-11-11
 
 #### Added - Onboarding

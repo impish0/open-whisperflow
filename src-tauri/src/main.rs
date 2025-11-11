@@ -119,6 +119,9 @@ fn main() {
             commands::start_whisper_container,
             commands::stop_whisper_container,
             commands::get_available_models,
+            commands::check_ollama_status,
+            commands::get_ollama_models,
+            commands::get_recommended_ollama_models,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

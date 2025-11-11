@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { AppConfig } from "@/types";
+import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { AppConfig, DockerStatus, ModelInfo } from "@/types";
 import "./SettingsPanel.css";
 
 interface SettingsPanelProps {
@@ -10,6 +11,59 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPanelProps) {
   const [localConfig, setLocalConfig] = useState<AppConfig>(config);
+  const [dockerStatus, setDockerStatus] = useState<DockerStatus | null>(null);
+  const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Load Docker status and models on mount
+  useEffect(() => {
+    loadDockerStatus();
+    loadAvailableModels();
+  }, []);
+
+  const loadDockerStatus = async () => {
+    try {
+      const status = await invoke<DockerStatus>("check_docker_status");
+      setDockerStatus(status);
+    } catch (error) {
+      console.error("Failed to load Docker status:", error);
+    }
+  };
+
+  const loadAvailableModels = async () => {
+    try {
+      const models = await invoke<ModelInfo[]>("get_available_models");
+      setAvailableModels(models);
+    } catch (error) {
+      console.error("Failed to load models:", error);
+    }
+  };
+
+  const handleStartContainer = async () => {
+    setLoading(true);
+    try {
+      await invoke("start_whisper_container");
+      await loadDockerStatus();
+      alert("Container started successfully!");
+    } catch (error) {
+      alert(`Failed to start container: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStopContainer = async () => {
+    setLoading(true);
+    try {
+      await invoke("stop_whisper_container");
+      await loadDockerStatus();
+      alert("Container stopped successfully!");
+    } catch (error) {
+      alert(`Failed to stop container: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = () => {
     onUpdate(localConfig);
@@ -43,8 +97,8 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
             value={localConfig.transcription.backend}
             onChange={(e) => updateTranscription("backend", e.target.value)}
           >
-            <option value="OpenAI">OpenAI Whisper API</option>
-            <option value="FasterWhisper">faster-whisper (Local)</option>
+            <option value="OpenAI">OpenAI Whisper API (Cloud)</option>
+            <option value="FasterWhisper">faster-whisper (Local - Docker)</option>
           </select>
         </label>
 
@@ -65,8 +119,88 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
                 type="text"
                 value={localConfig.transcription.model}
                 onChange={(e) => updateTranscription("model", e.target.value)}
+                placeholder="whisper-1"
               />
             </label>
+          </>
+        )}
+
+        {localConfig.transcription.backend === "FasterWhisper" && (
+          <>
+            {/* Docker Status */}
+            <div className="docker-status">
+              <h4>Docker Status</h4>
+              {dockerStatus ? (
+                <>
+                  <div className={`status-badge ${dockerStatus.available ? "status-ok" : "status-error"}`}>
+                    Docker: {dockerStatus.available ? "✓ Running" : "✗ Not Running"}
+                  </div>
+                  {dockerStatus.available && (
+                    <>
+                      <div className={`status-badge ${dockerStatus.container_running ? "status-ok" : "status-warning"}`}>
+                        Container: {dockerStatus.container_running ? "✓ Running" : "Stopped"}
+                      </div>
+                      {dockerStatus.has_nvidia_gpu && (
+                        <div className="status-badge status-ok">
+                          GPU: ✓ NVIDIA CUDA Available
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <p className="status-message">{dockerStatus.message}</p>
+                </>
+              ) : (
+                <div>Loading Docker status...</div>
+              )}
+            </div>
+
+            {/* Container Management */}
+            {dockerStatus?.available && (
+              <div className="container-actions">
+                {!dockerStatus.container_running ? (
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleStartContainer}
+                    disabled={loading}
+                  >
+                    {loading ? "Starting..." : "Start Container"}
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleStopContainer}
+                    disabled={loading}
+                  >
+                    {loading ? "Stopping..." : "Stop Container"}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Model Selection */}
+            <label>
+              Whisper Model:
+              <select
+                value={localConfig.transcription.model}
+                onChange={(e) => updateTranscription("model", e.target.value)}
+              >
+                {availableModels.map((model) => (
+                  <option key={model.name} value={model.name}>
+                    {model.name} - {model.size} {model.recommended ? "(Recommended)" : ""} - {model.description}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {!dockerStatus?.available && (
+              <div className="info-box warning">
+                <strong>Docker Required:</strong> Please install and start Docker Desktop to use local transcription.
+                <br />
+                <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">
+                  Download Docker Desktop
+                </a>
+              </div>
+            )}
           </>
         )}
       </section>

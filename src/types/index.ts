@@ -73,3 +73,17 @@ export interface BackendStatus {
   available: boolean;
   message: string;
 }
+
+export interface DockerStatus {
+  available: boolean;
+  container_running: boolean;
+  has_nvidia_gpu: boolean;
+  message: string;
+}
+
+export interface ModelInfo {
+  name: string;
+  size: string;
+  description: string;
+  recommended: boolean;
+}

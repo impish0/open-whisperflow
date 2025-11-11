@@ -106,7 +106,6 @@ impl TranscriptionService {
                 Box::new(OpenAIWhisperBackend::new(api_key, config.model.clone()))
             }
             crate::config::TranscriptionBackend::FasterWhisper => {
-                // TODO: Implement faster-whisper backend
                 return Err(AppError::BackendUnavailable(
                     "faster-whisper backend not yet implemented".to_string(),
                 ));

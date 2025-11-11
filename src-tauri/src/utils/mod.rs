@@ -5,8 +5,7 @@ use crate::error::Result;
 
 /// Securely delete a file by overwriting with zeros first (paranoid mode)
 pub async fn secure_delete_file(path: &Path) -> Result<()> {
-    // For MVP, just delete normally
-    // TODO: Implement secure overwrite
+    // For MVP, just delete normally (secure overwrite planned for paranoid mode)
     fs::remove_file(path).await?;
     log::debug!("Deleted file: {}", path.display());
     Ok(())

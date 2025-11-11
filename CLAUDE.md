@@ -222,6 +222,24 @@ npm run tauri:build
 ```
 
 #### 3. **Code Comments** (Required for complex logic)
+
+**CRITICAL RULE: NO SCATTERED TODOS IN CODE**
+
+**NEVER use these markers in production code:**
+- `TODO:` - All tasks must go in TODO.md
+- `FIXME:` - All bugs must go in TODO.md
+- `HACK:` - Document in TODO.md as technical debt
+- `XXX:` - Use proper error handling instead
+- `NOTE:` - Either make it a proper comment or add to TODO.md
+
+**When you need to track work:**
+1. Add an entry to TODO.md with file/line reference
+2. Use descriptive commit messages
+3. Update CHANGELOG.md when completing the task
+
+**Exception:** Only during active development on a feature branch are temporary TODOs allowed, but they MUST be removed before PR merge.
+
+**Good code comments explain WHY, not WHAT:**
 ```rust
 // GOOD: Explains WHY
 // We use a hybrid injection method because some apps block clipboard paste
@@ -239,6 +257,26 @@ pub async fn inject_text(&mut self, text: &str) -> Result<()> {
 // BAD: Explains WHAT (obvious from code)
 // This function injects text
 pub async fn inject_text(&mut self, text: &str) -> Result<()> { ... }
+
+// BAD: Scattered TODO (belongs in TODO.md)
+// TODO: Add retry logic here
+pub async fn process(&self) -> Result<()> { ... }
+```
+
+**How to handle unimplemented features:**
+```rust
+// GOOD: Clear error message, tracked in TODO.md
+crate::config::TranscriptionBackend::FasterWhisper => {
+    return Err(AppError::BackendUnavailable(
+        "faster-whisper backend not yet implemented".to_string(),
+    ));
+}
+
+// BAD: Scattered TODO comment
+crate::config::TranscriptionBackend::FasterWhisper => {
+    // TODO: Implement faster-whisper backend
+    return Err(AppError::BackendUnavailable("Not implemented".to_string()));
+}
 ```
 
 #### 4. **Git Commit Messages** (Required)

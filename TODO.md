@@ -225,12 +225,25 @@
 ## 🔧 Technical Debt
 
 ### High Priority
+- [ ] **faster-whisper backend implementation** (transcription/mod.rs:109)
+  - Implement FasterWhisperBackend trait
+  - Docker container management
+  - See Phase 2 tasks for details
+
 - [ ] Add comprehensive error recovery for all async operations
 - [ ] Implement proper logging system (file rotation, levels)
 - [ ] Add integration tests for full workflow
 - [ ] Security audit of API key storage
 
 ### Medium Priority
+- [ ] **Global hotkey implementation** (hotkeys/mod.rs)
+  - Complete tauri-plugin-global-shortcut integration
+  - See Phase 4 for full implementation plan
+
+- [ ] **Secure file deletion** (utils/mod.rs:9)
+  - Implement overwrite-before-delete for paranoid mode
+  - Optional feature for privacy-conscious users
+
 - [ ] Refactor state management (consider using proper state machine)
 - [ ] Add performance monitoring/profiling
 - [ ] Improve audio buffer management (prevent overflow)

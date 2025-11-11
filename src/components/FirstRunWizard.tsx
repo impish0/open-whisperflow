@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { AppConfig } from "@/types";
+import { AppConfig, DockerStatus } from "@/types";
 import "./FirstRunWizard.css";
 
 interface FirstRunWizardProps {
@@ -11,7 +11,6 @@ type WizardStep = "welcome" | "setup-choice" | "cloud-setup" | "local-setup" | "
 
 export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>("welcome");
-  const [setupMode, setSetupMode] = useState<"cloud" | "local" | null>(null);
   const [apiKey, setApiKey] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -22,7 +21,6 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
   };
 
   const handleSetupChoice = (mode: "cloud" | "local") => {
-    setSetupMode(mode);
     if (mode === "cloud") {
       setCurrentStep("cloud-setup");
     } else {
@@ -74,7 +72,7 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
   const handleLocalSetupComplete = async () => {
     try {
       // Check Docker status
-      const dockerStatus = await invoke("check_docker_status");
+      const dockerStatus = await invoke<DockerStatus>("check_docker_status");
 
       if (!dockerStatus.available) {
         setValidationError("Docker is not running. Please start Docker Desktop and try again.");
@@ -156,9 +154,7 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
           {currentStep === "welcome" && (
             <div className="wizard-step">
               <h1>Welcome to Open WhisperFlow! 🎤</h1>
-              <p className="wizard-subtitle">
-                Transform your voice into polished, written content
-              </p>
+              <p className="wizard-subtitle">Transform your voice into polished, written content</p>
 
               <div className="feature-list">
                 <div className="feature-item">
@@ -184,7 +180,10 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
                 </div>
               </div>
 
-              <button className="btn btn-primary btn-large" onClick={() => handleNext("setup-choice")}>
+              <button
+                className="btn btn-primary btn-large"
+                onClick={() => handleNext("setup-choice")}
+              >
                 Get Started
               </button>
             </div>
@@ -193,9 +192,7 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
           {currentStep === "setup-choice" && (
             <div className="wizard-step">
               <h2>Choose Your Setup</h2>
-              <p className="wizard-subtitle">
-                You can always change this later in settings
-              </p>
+              <p className="wizard-subtitle">You can always change this later in settings</p>
 
               <div className="setup-options">
                 <div className="setup-card" onClick={() => handleSetupChoice("cloud")}>
@@ -236,9 +233,7 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
           {currentStep === "cloud-setup" && (
             <div className="wizard-step">
               <h2>Cloud Setup</h2>
-              <p className="wizard-subtitle">
-                Enter your OpenAI API key to get started
-              </p>
+              <p className="wizard-subtitle">Enter your OpenAI API key to get started</p>
 
               <div className="setup-instructions">
                 <p>
@@ -298,9 +293,7 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
           {currentStep === "local-setup" && (
             <div className="wizard-step">
               <h2>Local Setup</h2>
-              <p className="wizard-subtitle">
-                Set up local transcription with Docker
-              </p>
+              <p className="wizard-subtitle">Set up local transcription with Docker</p>
 
               <div className="setup-instructions">
                 <p>
@@ -350,13 +343,13 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
           {currentStep === "test" && (
             <div className="wizard-step">
               <h2>Test Your Setup</h2>
-              <p className="wizard-subtitle">
-                Let's make sure everything works!
-              </p>
+              <p className="wizard-subtitle">Let's make sure everything works!</p>
 
               <div className="test-instructions">
                 <p>Click the button below and say something like:</p>
-                <div className="example-phrase">"Testing Open WhisperFlow - it's working great!"</div>
+                <div className="example-phrase">
+                  "Testing Open WhisperFlow - it's working great!"
+                </div>
               </div>
 
               {validationError && <div className="error-message">{validationError}</div>}
@@ -380,9 +373,7 @@ export default function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
             <div className="wizard-step">
               <div className="success-icon">✓</div>
               <h2>All Set!</h2>
-              <p className="wizard-subtitle">
-                Open WhisperFlow is ready to use
-              </p>
+              <p className="wizard-subtitle">Open WhisperFlow is ready to use</p>
 
               <div className="quick-tips">
                 <h3>Quick Tips:</h3>

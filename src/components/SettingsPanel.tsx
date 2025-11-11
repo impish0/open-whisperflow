@@ -312,15 +312,13 @@ export default function SettingsPanel({ config, onUpdate, onClose }: SettingsPan
                 <strong>Ollama Required:</strong> Please install and start Ollama to use local LLM
                 rewriting.
                 <br />
-                <a
-                  href="https://ollama.com/download"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer">
                   Download Ollama
                 </a>
                 <br />
-                <small>After installation, run: <code>ollama serve</code></small>
+                <small>
+                  After installation, run: <code>ollama serve</code>
+                </small>
               </div>
             )}
 

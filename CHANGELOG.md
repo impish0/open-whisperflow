@@ -81,6 +81,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+### Phase 2.5 (Consumer-Ready UX) - Added 2025-11-11
+
+#### Added - Onboarding
+- **First-Run Wizard** - Multi-step guided setup
+  - Welcome screen with feature highlights
+  - Setup choice: Quick (Cloud) vs Local (Docker)
+  - Cloud setup: API key entry with validation
+  - Local setup: Docker installation guidance
+  - Optional test recording step
+  - Success confirmation
+- **Progressive Disclosure** - Simple by default, advanced in settings
+  - Quick setup: 5 minutes (Cloud mode)
+  - Advanced setup: 15 minutes (Local mode)
+  - No technical jargon in main flow
+  - Clear cost information ($0.10/hour for cloud)
+  - Visual feedback at every step
+
+#### Added - Automatic Container Management
+- **Background Container Prestart**
+  - Automatically starts Docker container on app launch
+  - Non-blocking background task
+  - Instant first transcription (no 10-20s wait)
+  - Graceful degradation if Docker unavailable
+- **Transparent Docker Operations**
+  - Users never see "Start Container" in normal flow
+  - Container lifecycle fully automated
+  - Manual controls only in Advanced settings
+
+#### UX Improvements
+- Animated progress indicators
+- Beautiful gradient design
+- Step-by-step guidance
+- Error recovery with helpful messages
+- Persistent setup state (localStorage)
+- Responsive design for all screen sizes
+
+#### Consumer-Ready Features
+- ✅ Zero-friction cloud setup (5 min)
+- ✅ Guided local setup (15 min)
+- ✅ Automatic container management
+- ✅ No manual Docker operations needed
+- ✅ Clear next steps always shown
+- ✅ Professional visual design
+
+**User Experience Flow:**
+1. First launch → Beautiful wizard appears
+2. Choose Quick (API key) or Local (Docker) setup
+3. Follow step-by-step guidance
+4. Optional test recording
+5. Success! App is ready to use
+
+**Result**: App is now consumer-friendly while remaining powerful for technical users.
+
+---
+
 ## [0.1.0] - 2025-11-11
 
 ### Added

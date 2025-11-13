@@ -30,6 +30,8 @@ pub fn get_system_info() -> String {
 }
 
 /// Format duration in human-readable form
+/// Useful for displaying recording/processing times in UI
+#[allow(dead_code)]
 pub fn format_duration(seconds: f64) -> String {
     if seconds < 60.0 {
         format!("{:.1}s", seconds)

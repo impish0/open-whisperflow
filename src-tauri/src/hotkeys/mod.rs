@@ -1,3 +1,6 @@
+// Phase 4 feature - not yet implemented
+#![allow(dead_code)]
+
 use crate::error::Result;
 
 pub struct HotkeyManager;

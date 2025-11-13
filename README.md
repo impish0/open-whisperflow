@@ -3,8 +3,9 @@
 **Privacy-first, open-source voice-to-text with AI-powered text refinement.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](CHANGELOG.md)
-[![Phase](https://img.shields.io/badge/phase-1%20complete-green.svg)](TODO.md)
+[![Version](https://img.shields.io/badge/version-0.1.0--dev-blue.svg)](CHANGELOG.md)
+[![Phase](https://img.shields.io/badge/phase-3%20complete-green.svg)](TODO.md)
+[![Build Status](https://img.shields.io/badge/build-source--only-orange.svg)](#installation)
 
 Transform your speech into polished, written content across any application on Windows and Linux. No subscriptions, no cloud lock-in, complete control over your data.
 
@@ -67,38 +68,59 @@ Choose your path:
 
 ### Installation
 
-#### Windows
+> **⚠️ Note**: Pre-built installers are not yet available. Please build from source using the instructions below.
+>
+> **Coming Soon**: `.exe` (Windows), `.AppImage` / `.deb` (Linux) installers will be available in future releases.
 
-1. Download the latest installer from [Releases](https://github.com/yourusername/open-whisperflow/releases)
-2. Run `OpenWhisperFlow-Setup.exe`
-3. Launch Open WhisperFlow from Start Menu
-4. Follow the setup wizard
+#### Build from Source
 
-#### Linux
+**Prerequisites:**
+- Node.js 22+ ([download here](https://nodejs.org/))
+- Rust 1.91+ ([install here](https://rustup.rs/))
+- System dependencies (see below)
 
-**AppImage (Recommended)**:
+**Linux System Dependencies:**
 ```bash
-# Download
-wget https://github.com/yourusername/open-whisperflow/releases/latest/download/OpenWhisperFlow.AppImage
+# Debian/Ubuntu
+sudo apt-get update
+sudo apt-get install -y \
+  libwebkit2gtk-4.1-dev \
+  libappindicator3-dev \
+  librsvg2-dev \
+  patchelf \
+  libasound2-dev
 
-# Make executable
-chmod +x OpenWhisperFlow.AppImage
-
-# Run
-./OpenWhisperFlow.AppImage
+# Fedora/RHEL
+sudo dnf install webkit2gtk4.1-devel \
+  gtk3-devel \
+  librsvg2-devel \
+  alsa-lib-devel
 ```
 
-**Debian/Ubuntu (.deb)**:
+**Windows:**
+- Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) with C++ development tools
+
+**Build Steps:**
 ```bash
-wget https://github.com/yourusername/open-whisperflow/releases/latest/download/open-whisperflow_amd64.deb
-sudo dpkg -i open-whisperflow_amd64.deb
+# Clone the repository
+git clone https://github.com/yourusername/open-whisperflow.git
+cd open-whisperflow
+
+# Install dependencies
+npm install
+
+# Run in development mode (with hot reload)
+npm run tauri:dev
+
+# OR build for production
+npm run tauri:build
 ```
 
-**Fedora/RHEL (.rpm)**:
-```bash
-wget https://github.com/yourusername/open-whisperflow/releases/latest/download/open-whisperflow.rpm
-sudo dnf install open-whisperflow.rpm
-```
+**Built installers will be in:**
+- Linux: `src-tauri/target/release/bundle/appimage/` or `src-tauri/target/release/bundle/deb/`
+- Windows: `src-tauri/target/release/bundle/nsis/`
+
+For detailed development setup, see [DEV_SETUP.md](DEV_SETUP.md).
 
 ---
 
@@ -334,34 +356,51 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 🛣️ Roadmap
 
-### v0.1 (MVP - Current)
-- [x] Basic voice recording
+### Phase 1 ✅ Complete
+- [x] Basic voice recording with cpal
 - [x] OpenAI Whisper API transcription
 - [x] GPT-4 text rewriting
-- [x] Text injection
+- [x] Text injection (clipboard, typing, hybrid)
+- [x] Basic settings UI
+- [x] Configuration system
 
-### v0.2 (In Progress)
-- [ ] Local Whisper (faster-whisper)
-- [ ] Ollama integration
-- [ ] Multiple prompt templates
-- [ ] Basic settings UI
+### Phase 2 ✅ Complete
+- [x] Docker integration for local transcription
+- [x] faster-whisper backend
+- [x] GPU detection (NVIDIA CUDA)
+- [x] Model selection UI
+- [x] Automatic container management
 
-### v0.3 (Next)
+### Phase 2.5 ✅ Complete
+- [x] First-run wizard
+- [x] Consumer-friendly onboarding
+- [x] Cloud vs Local setup paths
+
+### Phase 3 ✅ Complete
+- [x] Ollama integration
+- [x] Local LLM backend
+- [x] Model management UI
+- [x] 100% offline pipeline
+
+### Phase 4 (Next)
 - [ ] Global hotkeys
 - [ ] VAD auto-stop
-- [ ] Context detection
-- [ ] First-run wizard
+- [ ] System tray integration
+- [ ] Notification system
 
-### v0.4
+### Phase 5 (Future)
 - [ ] Voice shortcuts
 - [ ] Transcription history
 - [ ] Multi-language support
+- [ ] Context detection
 
-### v1.0
+### v1.0 (Future)
+- [ ] Pre-built installers
 - [ ] Auto-updater
-- [ ] Advanced voice shortcuts
 - [ ] CLI interface
 - [ ] Plugin system
+
+**Current Status**: Phase 3 complete - Full local pipeline working!
 
 See [COMPREHENSIVE_PLAN.md](COMPREHENSIVE_PLAN.md) for detailed roadmap.
 
@@ -376,11 +415,12 @@ See [COMPREHENSIVE_PLAN.md](COMPREHENSIVE_PLAN.md) for detailed roadmap.
 
 ---
 
-## 💬 Community
+## 💬 Community & Support
 
-- **Discord**: [Join our server](https://discord.gg/openwhisperflow)
-- **GitHub Discussions**: [Ask questions, share ideas](https://github.com/yourusername/open-whisperflow/discussions)
-- **Twitter**: [@OpenWhisperFlow](https://twitter.com/openwhisperflow)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/impish0/open-whisperflow/issues)
+- **GitHub Discussions**: [Ask questions, share ideas](https://github.com/impish0/open-whisperflow/discussions)
+
+> **Note**: Discord and social media channels coming soon!
 
 ---
 
@@ -415,12 +455,6 @@ Open WhisperFlow is an independent open-source project and is not affiliated wit
 
 ---
 
-## 🌟 Star History
+**Made with ❤️ by the Open WhisperFlow community**
 
-If you find Open WhisperFlow useful, please consider starring the repo! It helps others discover the project.
-
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/open-whisperflow&type=Date)](https://star-history.com/#yourusername/open-whisperflow&Date)
-
----
-
-Made with ❤️ by the Open WhisperFlow community
+If you find this project useful, please star the repo! ⭐

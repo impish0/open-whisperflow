@@ -1,6 +1,5 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tauri::State;
-use tokio::sync::Mutex as TokioMutex;
 
 use crate::audio::AudioRecorder;
 use crate::config::AppConfig;
@@ -15,7 +14,7 @@ use crate::transcription::TranscriptionService;
 #[tauri::command]
 pub async fn start_recording(
     state: State<'_, AppState>,
-    recorder: State<'_, Arc<TokioMutex<AudioRecorder>>>,
+    recorder: State<'_, Arc<Mutex<AudioRecorder>>>,
 ) -> Result<()> {
     log::info!("Command: start_recording");
 
@@ -34,7 +33,7 @@ pub async fn start_recording(
         .await;
 
     // Start recording
-    let mut rec = recorder.lock().await;
+    let mut rec = recorder.lock().unwrap();
     rec.start_recording()?;
 
     Ok(())
@@ -44,13 +43,13 @@ pub async fn start_recording(
 #[tauri::command]
 pub async fn stop_recording(
     state: State<'_, AppState>,
-    recorder: State<'_, Arc<TokioMutex<AudioRecorder>>>,
+    recorder: State<'_, Arc<Mutex<AudioRecorder>>>,
 ) -> Result<ProcessedResult> {
     log::info!("Command: stop_recording");
 
     // Stop recording and get audio file path
     let audio_path = {
-        let mut rec = recorder.lock().await;
+        let mut rec = recorder.lock().unwrap();
         rec.stop_recording()?
     };
 
@@ -108,13 +107,13 @@ pub async fn stop_recording(
 #[tauri::command]
 pub async fn cancel_recording(
     state: State<'_, AppState>,
-    recorder: State<'_, Arc<TokioMutex<AudioRecorder>>>,
+    recorder: State<'_, Arc<Mutex<AudioRecorder>>>,
 ) -> Result<()> {
     log::info!("Command: cancel_recording");
 
     // Stop recording if active
     if state.is_recording().await {
-        let mut rec = recorder.lock().await;
+        let mut rec = recorder.lock().unwrap();
         let audio_path = rec.stop_recording()?;
         // Delete the audio file
         crate::utils::secure_delete_file(&audio_path).await.ok();

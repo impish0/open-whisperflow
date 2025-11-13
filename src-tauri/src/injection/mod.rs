@@ -1,4 +1,4 @@
-use enigo::{Direction, Enigo, Key, Settings};
+use enigo::{Direction, Enigo, Key, Keyboard, Settings};
 use std::time::Duration;
 use tokio::time::sleep;
 

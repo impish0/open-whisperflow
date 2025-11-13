@@ -1,8 +1,7 @@
 // Prevents additional console window on Windows in release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::Arc;
-use tokio::sync::Mutex as TokioMutex;
+use std::sync::{Arc, Mutex};
 
 mod audio;
 mod commands;
@@ -86,7 +85,7 @@ fn main() {
             let app_state = AppState::new().expect("Failed to create app state");
 
             // Initialize audio recorder
-            let audio_recorder = Arc::new(TokioMutex::new(
+            let audio_recorder = Arc::new(Mutex::new(
                 AudioRecorder::new().expect("Failed to create audio recorder"),
             ));
 

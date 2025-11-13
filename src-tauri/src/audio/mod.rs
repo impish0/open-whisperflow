@@ -1,5 +1,5 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{Device, SampleFormat, Stream, StreamConfig};
+use cpal::{Device, SampleFormat, Stream, StreamConfig, SupportedStreamConfig};
 use hound::{WavSpec, WavWriter};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
@@ -9,6 +9,7 @@ use crate::error::{AppError, Result};
 pub struct AudioRecorder {
     device: Device,
     config: StreamConfig,
+    sample_format: SampleFormat,
     stream: Option<Stream>,
     buffer: Arc<Mutex<Vec<f32>>>,
     is_recording: Arc<Mutex<bool>>,
@@ -24,14 +25,17 @@ impl AudioRecorder {
 
         log::info!("Using audio device: {}", device.name().unwrap_or_default());
 
-        let config = device
+        let supported_config = device
             .default_input_config()
-            .map_err(|e| AppError::AudioRecording(format!("Failed to get default config: {}", e)))?
-            .into();
+            .map_err(|e| AppError::AudioRecording(format!("Failed to get default config: {}", e)))?;
+
+        let sample_format = supported_config.sample_format();
+        let config = supported_config.into();
 
         Ok(Self {
             device,
             config,
+            sample_format,
             stream: None,
             buffer: Arc::new(Mutex::new(Vec::new())),
             is_recording: Arc::new(Mutex::new(false)),
@@ -50,7 +54,7 @@ impl AudioRecorder {
             log::error!("Audio stream error: {}", err);
         };
 
-        let stream = match self.config.sample_format {
+        let stream = match self.sample_format {
             SampleFormat::F32 => self.build_stream::<f32>(buffer, is_recording, err_fn)?,
             SampleFormat::I16 => self.build_stream::<i16>(buffer, is_recording, err_fn)?,
             SampleFormat::U16 => self.build_stream::<u16>(buffer, is_recording, err_fn)?,
@@ -150,7 +154,7 @@ impl AudioRecorder {
                     if *is_recording.lock().unwrap() {
                         let mut buf = buffer.lock().unwrap();
                         // Convert samples to f32
-                        buf.extend(data.iter().map(|&s| cpal::Sample::to_sample(&s)));
+                        buf.extend(data.iter().map(|&s| cpal::Sample::to_sample(s)));
                     }
                 },
                 err_fn,

@@ -86,6 +86,10 @@ sudo apt-get install -y \
 sudo apt-get install -y \
   libasound2-dev \
   portaudio19-dev
+
+# Install text injection dependency
+sudo apt-get install -y \
+  libxdo-dev
 ```
 
 ### Step 3: Install Rust
@@ -320,7 +324,8 @@ sudo apt-get install -y \
   libgtk-3-dev \
   libayatana-appindicator3-dev \
   pkg-config \
-  portaudio19-dev
+  portaudio19-dev \
+  libxdo-dev
 ```
 
 #### Fedora:
@@ -336,7 +341,8 @@ sudo dnf install -y \
   librsvg2-devel \
   alsa-lib-devel \
   gtk3-devel \
-  patchelf
+  patchelf \
+  libxdo-devel
 ```
 
 #### Arch Linux:
@@ -355,7 +361,8 @@ sudo pacman -S --needed \
   libappindicator-gtk3 \
   librsvg \
   alsa-lib \
-  patchelf
+  patchelf \
+  xdotool
 ```
 
 ### Step 2: Install Rust

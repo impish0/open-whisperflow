@@ -10,6 +10,8 @@ use crate::error::Result;
 pub struct AppState {
     pub config: Arc<RwLock<AppConfig>>,
     pub recording_state: Arc<RwLock<RecordingState>>,
+    /// Reserved for future use (streaming audio, real-time processing)
+    #[allow(dead_code)]
     pub audio_buffer: Arc<RwLock<Option<Vec<f32>>>>,
     pub audio_recorder: Arc<Mutex<Option<AudioRecorder>>>,
 }
@@ -76,6 +78,8 @@ impl AppState {
     }
 
     /// Check if currently processing
+    /// Reserved for frontend status checking
+    #[allow(dead_code)]
     pub async fn is_processing(&self) -> bool {
         matches!(
             *self.recording_state.read().await,

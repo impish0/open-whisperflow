@@ -171,7 +171,8 @@ impl AppConfig {
             .map_err(|e| AppError::Config(format!("Failed to save config: {}", e)))
     }
 
-    /// Get config file path
+    /// Get config file path - useful for debugging and showing users where config is stored
+    #[allow(dead_code)]
     pub fn get_config_path() -> Result<PathBuf> {
         confy::get_configuration_file_path("open-whisperflow", "config")
             .map_err(|e| AppError::Config(format!("Failed to get config path: {}", e)))

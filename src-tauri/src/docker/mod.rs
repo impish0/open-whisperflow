@@ -263,6 +263,8 @@ impl DockerClient {
     }
 
     /// Remove the faster-whisper container
+    /// Phase 2 feature - will be used for cleanup operations
+    #[allow(dead_code)]
     pub async fn remove_container(&self) -> Result<()> {
         if !self.container_exists().await? {
             log::info!("Container does not exist, nothing to remove");

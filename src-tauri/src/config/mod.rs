@@ -24,12 +24,36 @@ pub struct AudioConfig {
     pub max_recording_duration_seconds: u64,
 }
 
+impl Default for AudioConfig {
+    fn default() -> Self {
+        Self {
+            sample_rate: 16000,
+            channels: 1,
+            bit_depth: 16,
+            device_id: "default".to_string(),
+            vad_enabled: true,
+            max_recording_duration_seconds: 300,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TranscriptionConfig {
     pub backend: TranscriptionBackend,
     pub model: String,
     pub language: Option<String>,
     pub openai_api_key: Option<String>,
+}
+
+impl Default for TranscriptionConfig {
+    fn default() -> Self {
+        Self {
+            backend: TranscriptionBackend::OpenAI,
+            model: "whisper-1".to_string(),
+            language: None,
+            openai_api_key: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -50,6 +74,20 @@ pub struct LLMConfig {
     pub max_tokens: u32,
 }
 
+impl Default for LLMConfig {
+    fn default() -> Self {
+        Self {
+            backend: LLMBackend::OpenAI,
+            model: "gpt-4o-mini".to_string(),
+            base_url: "https://api.openai.com/v1".to_string(),
+            api_key: None,
+            default_template: "balanced".to_string(),
+            temperature: 0.7,
+            max_tokens: 500,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum LLMBackend {
@@ -63,6 +101,16 @@ pub struct InjectionConfig {
     pub method: InjectionMethod,
     pub typing_speed_ms: u64,
     pub clipboard_backup: bool,
+}
+
+impl Default for InjectionConfig {
+    fn default() -> Self {
+        Self {
+            method: InjectionMethod::Hybrid,
+            typing_speed_ms: 1,
+            clipboard_backup: true,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -97,34 +145,10 @@ pub enum Theme {
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
-            audio: AudioConfig {
-                sample_rate: 16000,
-                channels: 1,
-                bit_depth: 16,
-                device_id: "default".to_string(),
-                vad_enabled: true,
-                max_recording_duration_seconds: 300,
-            },
-            transcription: TranscriptionConfig {
-                backend: TranscriptionBackend::OpenAI,
-                model: "whisper-1".to_string(),
-                language: None,
-                openai_api_key: None,
-            },
-            llm: LLMConfig {
-                backend: LLMBackend::OpenAI,
-                model: "gpt-4o-mini".to_string(),
-                base_url: "https://api.openai.com/v1".to_string(),
-                api_key: None,
-                default_template: "balanced".to_string(),
-                temperature: 0.7,
-                max_tokens: 500,
-            },
-            injection: InjectionConfig {
-                method: InjectionMethod::Hybrid,
-                typing_speed_ms: 1,
-                clipboard_backup: true,
-            },
+            audio: AudioConfig::default(),
+            transcription: TranscriptionConfig::default(),
+            llm: LLMConfig::default(),
+            injection: InjectionConfig::default(),
             hotkeys: HotkeyConfig {
                 toggle_recording: "Ctrl+Shift+Space".to_string(),
                 cancel_recording: "Escape".to_string(),

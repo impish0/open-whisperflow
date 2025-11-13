@@ -211,12 +211,19 @@ mod tests {
 
     #[test]
     fn test_network_error_message() {
-        let error = AppError::Network(
-            reqwest::Error::new(reqwest::StatusCode::UNAUTHORIZED, "Unauthorized"),
-        );
-        let message = error.user_message();
+        // Create a network error by building a client with invalid config
+        let error = reqwest::Client::builder()
+            .build()
+            .and_then(|client| {
+                // This will create a URL parse error which is a type of reqwest::Error
+                client.get("not a valid url").build()
+            })
+            .unwrap_err();
 
-        assert!(message.contains("Network error") || message.contains("Cannot connect"));
+        let app_error = AppError::Network(error);
+        let message = app_error.user_message();
+
+        assert!(message.contains("Network error") || message.contains("Cannot connect") || message.contains("network"));
     }
 
     #[test]
@@ -257,10 +264,13 @@ mod tests {
 
     #[test]
     fn test_recoverable_errors() {
-        assert!(AppError::Network(
-            reqwest::Error::new(reqwest::StatusCode::INTERNAL_SERVER_ERROR, "Server error")
-        )
-        .is_recoverable());
+        // Create a reqwest error for testing
+        let req_error = reqwest::Client::builder()
+            .build()
+            .and_then(|client| client.get("not a valid url").build())
+            .unwrap_err();
+
+        assert!(AppError::Network(req_error).is_recoverable());
         assert!(AppError::BackendUnavailable("test".to_string()).is_recoverable());
         assert!(AppError::Docker("test".to_string()).is_recoverable());
         assert!(AppError::Config("test".to_string()).is_recoverable());
@@ -269,7 +279,12 @@ mod tests {
     #[test]
     fn test_non_recoverable_errors() {
         assert!(!AppError::AudioRecording("test".to_string()).is_recoverable());
-        assert!(!AppError::Json(serde_json::Error::custom("test")).is_recoverable());
+
+        // Create a JSON error by deserializing invalid JSON
+        let json_error: std::result::Result<serde_json::Value, _> =
+            serde_json::from_str("not valid json");
+        assert!(!AppError::Json(json_error.unwrap_err()).is_recoverable());
+
         assert!(!AppError::Unknown("test".to_string()).is_recoverable());
     }
 

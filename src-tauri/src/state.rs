@@ -36,7 +36,6 @@ pub enum RecordingState {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
 pub enum ProcessingStage {
     Transcribing,
     Rewriting,

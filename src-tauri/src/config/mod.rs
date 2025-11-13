@@ -57,7 +57,6 @@ impl Default for TranscriptionConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
 pub enum TranscriptionBackend {
     FasterWhisper,
     OpenAI,
@@ -89,7 +88,6 @@ impl Default for LLMConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
 pub enum LLMBackend {
     Ollama,
     OpenAI,
@@ -114,7 +112,6 @@ impl Default for InjectionConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
 pub enum InjectionMethod {
     Clipboard,
     Typing,
@@ -135,7 +132,6 @@ pub struct UIConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
 pub enum Theme {
     Light,
     Dark,

@@ -83,6 +83,24 @@ ENV/
 # Rust
 **/*.rs.bk
 *.pdb
+.cargo/
+**/*.rlib
+**/*.rmeta
+**/*.profraw
+
+# Additional Tauri/Rust ignores
+src-tauri/gen/
+src-tauri/debug/
+src-tauri/release/
+
+# TypeScript
+*.tsbuildinfo
+
+# ESLint cache
+.eslintcache
+
+# Vite
+.vite/
 
 # Lock files (keep for reproducibility)
 # Uncomment if needed

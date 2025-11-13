@@ -84,14 +84,8 @@ fn main() {
             // Initialize application state
             let app_state = AppState::new().expect("Failed to create app state");
 
-            // Initialize audio recorder
-            let audio_recorder = Arc::new(Mutex::new(
-                AudioRecorder::new().expect("Failed to create audio recorder"),
-            ));
-
             // Manage state
             app.manage(app_state.clone());
-            app.manage(audio_recorder);
 
             log::info!("Application setup complete");
             log::info!("System info:\n{}", utils::get_system_info());

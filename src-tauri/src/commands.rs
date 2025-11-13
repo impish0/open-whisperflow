@@ -12,10 +12,7 @@ use crate::transcription::TranscriptionService;
 
 /// Start audio recording
 #[tauri::command]
-pub async fn start_recording(
-    state: State<'_, AppState>,
-    recorder: State<'_, Arc<Mutex<AudioRecorder>>>,
-) -> Result<()> {
+pub async fn start_recording(state: State<'_, AppState>) -> Result<()> {
     log::info!("Command: start_recording");
 
     // Check if already recording
@@ -23,6 +20,12 @@ pub async fn start_recording(
         return Err(crate::error::AppError::InvalidState(
             "Already recording".to_string(),
         ));
+    }
+
+    // Create audio recorder if it doesn't exist
+    let mut recorder_opt = state.audio_recorder.lock().unwrap();
+    if recorder_opt.is_none() {
+        *recorder_opt = Some(AudioRecorder::new()?);
     }
 
     // Update state
@@ -33,24 +36,26 @@ pub async fn start_recording(
         .await;
 
     // Start recording
-    let mut rec = recorder.lock().unwrap();
-    rec.start_recording()?;
+    if let Some(ref mut recorder) = *recorder_opt {
+        recorder.start_recording()?;
+    }
 
     Ok(())
 }
 
 /// Stop recording and process audio
 #[tauri::command]
-pub async fn stop_recording(
-    state: State<'_, AppState>,
-    recorder: State<'_, Arc<Mutex<AudioRecorder>>>,
-) -> Result<ProcessedResult> {
+pub async fn stop_recording(state: State<'_, AppState>) -> Result<ProcessedResult> {
     log::info!("Command: stop_recording");
 
     // Stop recording and get audio file path
     let audio_path = {
-        let mut rec = recorder.lock().unwrap();
-        rec.stop_recording()?
+        let mut recorder_opt = state.audio_recorder.lock().unwrap();
+        if let Some(ref mut recorder) = *recorder_opt {
+            recorder.stop_recording()?
+        } else {
+            return Err(AppError::InvalidState("No active recorder".to_string()));
+        }
     };
 
     log::info!("Audio saved to: {}", audio_path.display());
@@ -105,18 +110,18 @@ pub async fn stop_recording(
 
 /// Cancel current recording
 #[tauri::command]
-pub async fn cancel_recording(
-    state: State<'_, AppState>,
-    recorder: State<'_, Arc<Mutex<AudioRecorder>>>,
-) -> Result<()> {
+pub async fn cancel_recording(state: State<'_, AppState>) -> Result<()> {
     log::info!("Command: cancel_recording");
 
     // Stop recording if active
     if state.is_recording().await {
-        let mut rec = recorder.lock().unwrap();
-        let audio_path = rec.stop_recording()?;
-        // Delete the audio file
-        crate::utils::secure_delete_file(&audio_path).await.ok();
+        let mut recorder_opt = state.audio_recorder.lock().unwrap();
+        if let Some(ref mut recorder) = *recorder_opt {
+            let audio_path = recorder.stop_recording()?;
+            // Delete the audio file
+            drop(recorder_opt); // Release lock before async operation
+            crate::utils::secure_delete_file(&audio_path).await.ok();
+        }
     }
 
     // Reset state

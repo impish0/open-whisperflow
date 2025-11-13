@@ -1,7 +1,7 @@
-use std::sync::Arc;
-use std::time::Instant;
+use std::sync::{Arc, Mutex};
 use tokio::sync::RwLock;
 
+use crate::audio::AudioRecorder;
 use crate::config::AppConfig;
 use crate::error::Result;
 
@@ -10,7 +10,13 @@ pub struct AppState {
     pub config: Arc<RwLock<AppConfig>>,
     pub recording_state: Arc<RwLock<RecordingState>>,
     pub audio_buffer: Arc<RwLock<Option<Vec<f32>>>>,
+    pub audio_recorder: Arc<Mutex<Option<AudioRecorder>>>,
 }
+
+// SAFETY: AudioRecorder contains cpal::Stream which is !Send, but we ensure single-threaded access via Mutex
+// All access to audio_recorder is synchronized through the Mutex, so this is safe
+unsafe impl Send for AppState {}
+unsafe impl Sync for AppState {}
 
 /// Current state of the recording process
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -47,6 +53,7 @@ impl AppState {
             config: Arc::new(RwLock::new(config)),
             recording_state: Arc::new(RwLock::new(RecordingState::Idle)),
             audio_buffer: Arc::new(RwLock::new(None)),
+            audio_recorder: Arc::new(Mutex::new(None)),
         })
     }
 

@@ -1,5 +1,5 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{Device, SampleFormat, Stream, StreamConfig, SupportedStreamConfig};
+use cpal::{Device, SampleFormat, Stream, StreamConfig};
 use hound::{WavSpec, WavWriter};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
@@ -154,7 +154,7 @@ impl AudioRecorder {
                     if *is_recording.lock().unwrap() {
                         let mut buf = buffer.lock().unwrap();
                         // Convert samples to f32
-                        buf.extend(data.iter().map(|&s| cpal::Sample::to_sample(s)));
+                        buf.extend(data.iter().map(|&s| s.to_sample::<f32>()));
                     }
                 },
                 err_fn,

@@ -123,21 +123,44 @@ pub struct UnifiedLLMClient {
 - Rust 1.91+
 - Git
 
-# Linux System Dependencies
+# Linux System Dependencies (Debian/Ubuntu)
 sudo apt-get update
 sudo apt-get install -y \
-  libwebkit2gtk-4.1-dev \
-  libappindicator3-dev \
-  librsvg2-dev \
+  libwebkit2gtk-4.1-dev \   # WebView rendering engine
+  libappindicator3-dev \     # System tray support
+  librsvg2-dev \             # SVG icon rendering
+  patchelf \                 # Binary patching for AppImage
+  libasound2-dev \           # Audio recording (ALSA)
+  libgtk-3-dev \             # GTK3 UI toolkit
+  libxdo-dev                 # Text injection (keyboard simulation)
+
+# Linux System Dependencies (Fedora/RHEL)
+sudo dnf install -y \
+  webkit2gtk4.1-devel \
+  gtk3-devel \
+  librsvg2-devel \
+  alsa-lib-devel \
+  libxdo-devel
+
+# Linux System Dependencies (Arch)
+sudo pacman -S \
+  webkit2gtk \
+  gtk3 \
+  librsvg \
   patchelf \
-  libasound2-dev
+  alsa-lib \
+  xdotool
 
-# Windows
-# Install Visual Studio Build Tools
-# https://visualstudio.microsoft.com/downloads/
+# Windows Prerequisites
+# 1. Install Visual Studio Build Tools (2022 or later)
+#    https://visualstudio.microsoft.com/downloads/
+#    - Select "Desktop development with C++"
+#    - Include "MSVC v143" and "Windows 10/11 SDK"
+# 2. Install WebView2 Runtime (usually pre-installed on Windows 11)
+#    https://developer.microsoft.com/en-us/microsoft-edge/webview2/
 
-# macOS
-# Xcode Command Line Tools
+# macOS Prerequisites
+# Install Xcode Command Line Tools
 xcode-select --install
 ```
 

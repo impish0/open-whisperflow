@@ -72,34 +72,5 @@
       "tooltip": "Open WhisperFlow"
     }
   },
-  "plugins": {
-    "dialog": {
-      "all": true,
-      "ask": true,
-      "confirm": true,
-      "message": true,
-      "open": true,
-      "save": true
-    },
-    "fs": {
-      "scope": [
-        "$APPDATA/*",
-        "$APPDATA/**",
-        "$APPCONFIG/*",
-        "$APPCONFIG/**",
-        "$TEMP/*",
-        "$TEMP/**"
-      ]
-    },
-    "globalShortcut": {
-      "all": true
-    },
-    "notification": {
-      "all": true
-    },
-    "shell": {
-      "open": true,
-      "scope": []
-    }
-  }
+  "plugins": {}
 }

@@ -88,17 +88,31 @@ sudo apt-get install -y \
   libappindicator3-dev \
   librsvg2-dev \
   patchelf \
-  libasound2-dev
+  libasound2-dev \
+  libgtk-3-dev \
+  libxdo-dev
 
 # Fedora/RHEL
 sudo dnf install webkit2gtk4.1-devel \
   gtk3-devel \
   librsvg2-devel \
-  alsa-lib-devel
+  alsa-lib-devel \
+  libxdo-devel
+
+# Arch Linux
+sudo pacman -S webkit2gtk \
+  gtk3 \
+  librsvg \
+  patchelf \
+  alsa-lib \
+  xdotool
 ```
 
-**Windows:**
-- Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) with C++ development tools
+**Windows Prerequisites:**
+1. Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) (2022 or later)
+   - Select "Desktop development with C++"
+   - Include "MSVC v143" and "Windows 10/11 SDK"
+2. Install [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (usually pre-installed on Windows 11)
 
 **Build Steps:**
 ```bash

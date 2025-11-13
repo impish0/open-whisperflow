@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::{Arc, Mutex};
+use tauri::Manager;
 
 mod audio;
 mod commands;
@@ -15,8 +15,6 @@ mod state;
 mod transcription;
 mod utils;
 
-use audio::AudioRecorder;
-use config::AppConfig;
 use docker::DockerClient;
 use state::AppState;
 

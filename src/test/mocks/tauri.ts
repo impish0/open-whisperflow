@@ -83,10 +83,10 @@ export const mockCommands = {
 
 // Configure mock invoke to return appropriate values
 export const setupMockInvoke = () => {
-  mockInvoke.mockImplementation((command: string, args?: unknown) => {
+  mockInvoke.mockImplementation((command: string, _args?: unknown) => {
     const handler = mockCommands[command as keyof typeof mockCommands];
     if (handler) {
-      return Promise.resolve(handler(args));
+      return Promise.resolve(handler());
     }
     return Promise.resolve(null);
   });

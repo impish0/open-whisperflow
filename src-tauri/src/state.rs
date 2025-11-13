@@ -6,6 +6,7 @@ use crate::config::AppConfig;
 use crate::error::Result;
 
 /// Application state shared across all Tauri commands
+#[derive(Clone)]
 pub struct AppState {
     pub config: Arc<RwLock<AppConfig>>,
     pub recording_state: Arc<RwLock<RecordingState>>,

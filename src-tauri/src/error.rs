@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 /// Custom error types for the application
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
@@ -180,6 +182,16 @@ impl AppError {
 impl From<AppError> for String {
     fn from(error: AppError) -> Self {
         error.user_message()
+    }
+}
+
+// Implement Serialize for AppError to work with Tauri IPC
+impl Serialize for AppError {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.user_message())
     }
 }
 

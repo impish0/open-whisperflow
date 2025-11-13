@@ -21,23 +21,25 @@ pub async fn start_recording(state: State<'_, AppState>) -> Result<()> {
         ));
     }
 
-    // Create audio recorder if it doesn't exist
-    let mut recorder_opt = state.audio_recorder.lock().unwrap();
-    if recorder_opt.is_none() {
-        *recorder_opt = Some(AudioRecorder::new()?);
-    }
+    // Create audio recorder if it doesn't exist and start recording
+    {
+        let mut recorder_opt = state.audio_recorder.lock().unwrap();
+        if recorder_opt.is_none() {
+            *recorder_opt = Some(AudioRecorder::new()?);
+        }
 
-    // Update state
+        // Start recording before releasing lock
+        if let Some(ref mut recorder) = *recorder_opt {
+            recorder.start_recording()?;
+        }
+    } // Lock is dropped here
+
+    // Update state after releasing lock
     state
         .set_recording_state(RecordingState::Recording {
             started_at: chrono::Utc::now().timestamp_millis() as u64,
         })
         .await;
-
-    // Start recording
-    if let Some(ref mut recorder) = *recorder_opt {
-        recorder.start_recording()?;
-    }
 
     Ok(())
 }
@@ -112,15 +114,21 @@ pub async fn stop_recording(state: State<'_, AppState>) -> Result<ProcessedResul
 pub async fn cancel_recording(state: State<'_, AppState>) -> Result<()> {
     log::info!("Command: cancel_recording");
 
-    // Stop recording if active
-    if state.is_recording().await {
+    // Stop recording if active and get audio path
+    let audio_path_opt = if state.is_recording().await {
         let mut recorder_opt = state.audio_recorder.lock().unwrap();
         if let Some(ref mut recorder) = *recorder_opt {
-            let audio_path = recorder.stop_recording()?;
-            // Delete the audio file
-            drop(recorder_opt); // Release lock before async operation
-            crate::utils::secure_delete_file(&audio_path).await.ok();
+            Some(recorder.stop_recording()?)
+        } else {
+            None
         }
+    } else {
+        None
+    }; // Lock is dropped here
+
+    // Delete the audio file if exists (after lock is released)
+    if let Some(audio_path) = audio_path_opt {
+        crate::utils::secure_delete_file(&audio_path).await.ok();
     }
 
     // Reset state

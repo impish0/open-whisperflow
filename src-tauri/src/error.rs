@@ -1,5 +1,3 @@
-use std::fmt;
-
 /// Custom error types for the application
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {

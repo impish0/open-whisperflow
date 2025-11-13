@@ -1,4 +1,3 @@
-use std::sync::{Arc, Mutex};
 use tauri::State;
 
 use crate::audio::AudioRecorder;
@@ -201,7 +200,7 @@ pub async fn check_transcription_backend(state: State<'_, AppState>) -> Result<B
 #[tauri::command]
 pub async fn check_llm_backend(state: State<'_, AppState>) -> Result<BackendStatus> {
     let config = state.config.read().await;
-    let service = LLMService::new(&config.llm)?;
+    let _service = LLMService::new(&config.llm)?;
 
     // Basic availability check
     let available = match config.llm.backend {

@@ -55,9 +55,9 @@ impl AudioRecorder {
         };
 
         let stream = match self.sample_format {
-            SampleFormat::F32 => self.build_stream::<f32>(buffer, is_recording, err_fn)?,
-            SampleFormat::I16 => self.build_stream::<i16>(buffer, is_recording, err_fn)?,
-            SampleFormat::U16 => self.build_stream::<u16>(buffer, is_recording, err_fn)?,
+            SampleFormat::F32 => self.build_stream_f32(buffer, is_recording, err_fn)?,
+            SampleFormat::I16 => self.build_stream_i16(buffer, is_recording, err_fn)?,
+            SampleFormat::U16 => self.build_stream_u16(buffer, is_recording, err_fn)?,
             _ => {
                 return Err(AppError::AudioRecording(
                     "Unsupported sample format".to_string(),
@@ -136,25 +136,73 @@ impl AudioRecorder {
         Ok(())
     }
 
-    /// Build audio input stream
-    fn build_stream<T>(
+    /// Build audio input stream for f32 samples
+    fn build_stream_f32(
         &self,
         buffer: Arc<Mutex<Vec<f32>>>,
         is_recording: Arc<Mutex<bool>>,
         err_fn: impl FnMut(cpal::StreamError) + Send + 'static,
-    ) -> Result<Stream>
-    where
-        T: cpal::Sample + cpal::SizedSample,
-    {
+    ) -> Result<Stream> {
         let stream = self
             .device
             .build_input_stream(
                 &self.config,
-                move |data: &[T], _: &_| {
+                move |data: &[f32], _: &_| {
                     if *is_recording.lock().unwrap() {
                         let mut buf = buffer.lock().unwrap();
-                        // Convert samples to f32
-                        buf.extend(data.iter().map(|&s| s.to_sample::<f32>()));
+                        buf.extend_from_slice(data);
+                    }
+                },
+                err_fn,
+                None,
+            )
+            .map_err(|e| AppError::AudioRecording(format!("Failed to build stream: {}", e)))?;
+
+        Ok(stream)
+    }
+
+    /// Build audio input stream for i16 samples
+    fn build_stream_i16(
+        &self,
+        buffer: Arc<Mutex<Vec<f32>>>,
+        is_recording: Arc<Mutex<bool>>,
+        err_fn: impl FnMut(cpal::StreamError) + Send + 'static,
+    ) -> Result<Stream> {
+        let stream = self
+            .device
+            .build_input_stream(
+                &self.config,
+                move |data: &[i16], _: &_| {
+                    if *is_recording.lock().unwrap() {
+                        let mut buf = buffer.lock().unwrap();
+                        // Convert i16 to f32 by normalizing
+                        buf.extend(data.iter().map(|&s| s as f32 / i16::MAX as f32));
+                    }
+                },
+                err_fn,
+                None,
+            )
+            .map_err(|e| AppError::AudioRecording(format!("Failed to build stream: {}", e)))?;
+
+        Ok(stream)
+    }
+
+    /// Build audio input stream for u16 samples
+    fn build_stream_u16(
+        &self,
+        buffer: Arc<Mutex<Vec<f32>>>,
+        is_recording: Arc<Mutex<bool>>,
+        err_fn: impl FnMut(cpal::StreamError) + Send + 'static,
+    ) -> Result<Stream> {
+        let stream = self
+            .device
+            .build_input_stream(
+                &self.config,
+                move |data: &[u16], _: &_| {
+                    if *is_recording.lock().unwrap() {
+                        let mut buf = buffer.lock().unwrap();
+                        // Convert u16 to f32 by normalizing (u16 is 0-65535, convert to -1.0 to 1.0)
+                        buf.extend(data.iter().map(|&s| (s as f32 / u16::MAX as f32) * 2.0 - 1.0));
                     }
                 },
                 err_fn,

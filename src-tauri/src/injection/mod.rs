@@ -1,4 +1,4 @@
-use enigo::{Enigo, Key, KeyboardControllable, Settings};
+use enigo::{Direction, Enigo, Key, Settings};
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -65,17 +65,17 @@ impl TextInjector {
 
         // Simulate Ctrl+V
         self.enigo
-            .key_down(Key::Control)
+            .key(Key::Control, Direction::Press)
             .map_err(|e| AppError::TextInjection(format!("Failed to press Ctrl: {}", e)))?;
         sleep(Duration::from_millis(50)).await;
 
         self.enigo
-            .key_click(Key::Unicode('v'))
+            .key(Key::Unicode('v'), Direction::Click)
             .map_err(|e| AppError::TextInjection(format!("Failed to press V: {}", e)))?;
         sleep(Duration::from_millis(50)).await;
 
         self.enigo
-            .key_up(Key::Control)
+            .key(Key::Control, Direction::Release)
             .map_err(|e| AppError::TextInjection(format!("Failed to release Ctrl: {}", e)))?;
 
         // Wait for paste to complete
@@ -94,7 +94,7 @@ impl TextInjector {
     async fn inject_via_typing(&mut self, text: &str) -> Result<()> {
         for c in text.chars() {
             self.enigo
-                .key_click(Key::Unicode(c))
+                .key(Key::Unicode(c), Direction::Click)
                 .map_err(|e| AppError::TextInjection(format!("Failed to type character: {}", e)))?;
 
             if self.config.typing_speed_ms > 0 {

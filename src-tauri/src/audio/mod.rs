@@ -50,7 +50,7 @@ impl AudioRecorder {
             log::error!("Audio stream error: {}", err);
         };
 
-        let stream = match self.config.sample_format() {
+        let stream = match self.config.sample_format {
             SampleFormat::F32 => self.build_stream::<f32>(buffer, is_recording, err_fn)?,
             SampleFormat::I16 => self.build_stream::<i16>(buffer, is_recording, err_fn)?,
             SampleFormat::U16 => self.build_stream::<u16>(buffer, is_recording, err_fn)?,
@@ -99,7 +99,7 @@ impl AudioRecorder {
         log::info!(
             "Recorded {} samples ({:.2} seconds)",
             buffer.len(),
-            buffer.len() as f32 / self.config.sample_rate().0 as f32
+            buffer.len() as f32 / self.config.sample_rate.0 as f32
         );
 
         Ok(temp_path)
@@ -108,8 +108,8 @@ impl AudioRecorder {
     /// Save audio buffer to WAV file
     fn save_wav(&self, path: &Path, samples: &[f32]) -> Result<()> {
         let spec = WavSpec {
-            channels: self.config.channels(),
-            sample_rate: self.config.sample_rate().0,
+            channels: self.config.channels,
+            sample_rate: self.config.sample_rate.0,
             bits_per_sample: 16,
             sample_format: hound::SampleFormat::Int,
         };
@@ -149,7 +149,8 @@ impl AudioRecorder {
                 move |data: &[T], _: &_| {
                     if *is_recording.lock().unwrap() {
                         let mut buf = buffer.lock().unwrap();
-                        buf.extend(data.iter().map(|s| s.to_sample::<f32>()));
+                        // Convert samples to f32
+                        buf.extend(data.iter().map(|&s| cpal::Sample::to_sample(&s)));
                     }
                 },
                 err_fn,
